@@ -16,7 +16,7 @@ interface BlueprintComparisonScreenProps {
 export interface CompatibilityData {
   overallScore: number;
   mindsetAlignment: number;
-  lifestylefit: number;
+  lifestyleFit: number;
   relationshipExpectations: number;
   personalityMatch: number;
   dealBreakerClashScore: number;
@@ -123,7 +123,7 @@ export function BlueprintComparisonScreen({
           <div className="grid md:grid-cols-2 gap-4">
             {[
               { label: 'Mindset Alignment', score: compatibilityData.mindsetAlignment, category: 'values' as const },
-              { label: 'Lifestyle Fit', score: compatibilityData.lifestylefit, category: 'lifestyle' as const },
+              { label: 'Lifestyle Fit', score: compatibilityData.lifestyleFit, category: 'lifestyle' as const },
               { label: 'Relationship Goals', score: compatibilityData.relationshipExpectations, category: 'relationship-goals' as const },
               { label: 'Personality Match', score: compatibilityData.personalityMatch, category: 'personality' as const }
             ].map((item, index) => (

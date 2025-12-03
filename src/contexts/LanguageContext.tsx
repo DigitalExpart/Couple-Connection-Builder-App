@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Language = 'en' | 'es' | 'fr' | 'de' | 'it';
 
@@ -1895,7 +1895,7 @@ const translations: Record<Language, Record<string, string>> = {
   },
 };
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('myMatchIQ_language');
     return (saved as Language) || 'en';
@@ -1920,7 +1920,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       {children}
     </LanguageContext.Provider>
   );
-}
+};
 
 export function useLanguage() {
   const context = useContext(LanguageContext);

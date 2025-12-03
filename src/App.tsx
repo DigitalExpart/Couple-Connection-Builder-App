@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
 import { OnboardingScreen } from './components/screens/OnboardingScreen';
 import { DashboardScreen } from './components/screens/DashboardScreen';
@@ -242,11 +242,11 @@ function AppContent() {
   const handleCompleteScan = (scan: MatchScan) => {
     if (continuingScanId) {
       // Update existing scan
-      setScans(prev => prev.map(s => s.id === continuingScanId ? scan : s));
+      setScans((prev) => prev.map(s => s.id === continuingScanId ? scan : s));
       setContinuingScanId(null);
     } else {
       // Add new scan
-      setScans(prev => [...prev, scan]);
+      setScans((prev) => [...prev, scan]);
     }
     setCurrentScan(scan);
     setCurrentScreen('results');
@@ -264,7 +264,7 @@ function AppContent() {
   };
 
   const handleDeleteScan = (scanId: string) => {
-    setScans(prev => prev.filter(s => s.id !== scanId));
+    setScans((prev) => prev.filter(s => s.id !== scanId));
     // If the deleted scan was the current scan, clear it
     if (currentScan?.id === scanId) {
       setCurrentScan(null);
@@ -273,10 +273,10 @@ function AppContent() {
   };
 
   const handleUpdateScan = (scanId: string, updates: Partial<MatchScan>) => {
-    setScans(prev => prev.map(s => s.id === scanId ? { ...s, ...updates } : s));
+    setScans((prev) => prev.map(s => s.id === scanId ? { ...s, ...updates } : s));
     // If updating the current scan, update it too
     if (currentScan?.id === scanId) {
-      setCurrentScan(prev => prev ? { ...prev, ...updates } : null);
+      setCurrentScan((prev) => prev ? { ...prev, ...updates } : null);
     }
   };
 
@@ -331,7 +331,7 @@ function AppContent() {
   };
 
   const handleDualScanSelectInteraction = (interactionType: InteractionType) => {
-    setDualScanState(prev => ({
+    setDualScanState((prev) => ({
       ...prev!,
       currentStep: 2,
       interactionType,
@@ -340,7 +340,7 @@ function AppContent() {
   };
 
   const handleDualScanSelectCategories = (categories: string[], isUnified: boolean) => {
-    setDualScanState(prev => ({
+    setDualScanState((prev) => ({
       ...prev!,
       currentStep: 3,
       selectedCategories: categories,
@@ -348,35 +348,38 @@ function AppContent() {
     }));
     
     // Save the category preference to session storage
-    if (prev?.sessionId) {
-      const sessionKey = `myMatchIQ_dualSession_${prev.sessionId}`;
-      const sessionData = localStorage.getItem(sessionKey);
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        
-        if (isUnified) {
-          // Store unified categories for both users
-          session.unifiedCategories = categories;
-          session.isUnified = true;
-        } else {
-          // Store individual categories per role
-          session.isUnified = false;
-          if (prev.role === 'A') {
-            session.userACategories = categories;
+    setDualScanState((prev) => {
+      if (prev?.sessionId) {
+        const sessionKey = `myMatchIQ_dualSession_${prev.sessionId}`;
+        const sessionData = localStorage.getItem(sessionKey);
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          
+          if (isUnified) {
+            // Store unified categories for both users
+            session.unifiedCategories = categories;
+            session.isUnified = true;
           } else {
-            session.userBCategories = categories;
+            // Store individual categories per role
+            session.isUnified = false;
+            if (prev.role === 'A') {
+              session.userACategories = categories;
+            } else {
+              session.userBCategories = categories;
+            }
           }
+          
+          localStorage.setItem(sessionKey, JSON.stringify(session));
         }
-        
-        localStorage.setItem(sessionKey, JSON.stringify(session));
       }
-    }
+      return prev;
+    });
     
     setCurrentScreen('dualScanFlow');
   };
 
   const handleCompleteDualScan = (score: number, answers: DualScanAnswer[]) => {
-    setDualScanState(prev => ({
+    setDualScanState((prev) => ({
       ...prev!,
       currentStep: 4,
       score,
@@ -384,23 +387,26 @@ function AppContent() {
     }));
     
     // Save to localStorage
-    if (prev?.sessionId && prev.role) {
-      const storageKey = `myMatchIQ_dualScan_${prev.sessionId}_${prev.role}`;
-      localStorage.setItem(storageKey, JSON.stringify({ score, answers, completedAt: new Date().toISOString() }));
-      
-      // Update session completion status
-      const sessionKey = `myMatchIQ_dualSession_${prev.sessionId}`;
-      const sessionData = localStorage.getItem(sessionKey);
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        if (prev.role === 'A') {
-          session.userACompleted = true;
-        } else {
-          session.userBCompleted = true;
+    setDualScanState((prev) => {
+      if (prev?.sessionId && prev.role) {
+        const storageKey = `myMatchIQ_dualScan_${prev.sessionId}_${prev.role}`;
+        localStorage.setItem(storageKey, JSON.stringify({ score, answers, completedAt: new Date().toISOString() }));
+        
+        // Update session completion status
+        const sessionKey = `myMatchIQ_dualSession_${prev.sessionId}`;
+        const sessionData = localStorage.getItem(sessionKey);
+        if (sessionData) {
+          const session = JSON.parse(sessionData);
+          if (prev.role === 'A') {
+            session.userACompleted = true;
+          } else {
+            session.userBCompleted = true;
+          }
+          localStorage.setItem(sessionKey, JSON.stringify(session));
         }
-        localStorage.setItem(sessionKey, JSON.stringify(session));
       }
-    }
+      return prev;
+    });
     
     setCurrentScreen('dualScanResults');
   };
@@ -634,9 +640,8 @@ function AppContent() {
               setCurrentScreen('blueprintGeneration');
             }}
             onBack={() => setCurrentScreen(isSelfAssessment ? 'dashboard' : 'blueprintHome')}
-            existingAnswers={userProfile?.selfAssessmentAnswers || blueprintAnswers || []}
+            initialAnswers={userProfile?.selfAssessmentAnswers || blueprintAnswers || []}
             onSaveProgress={isSelfAssessment ? handleSaveSelfAssessmentProgress : undefined}
-            isSelfAssessment={isSelfAssessment}
           />
         );
       case 'blueprintGeneration':
